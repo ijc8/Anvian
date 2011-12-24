@@ -4,9 +4,9 @@
 #include "util.h"
 
 GLuint program;
-GLuint attrCoords;
-GLuint texture;
-GLuint vbo;
+GLuint attrCoord, attrTexcoord;
+GLuint texture, uniformTexture;
+GLuint vbo, vboTexcoords;
 
 GLfloat vertices[] = {
     0.5,  0.5,
@@ -15,21 +15,45 @@ GLfloat vertices[] = {
    -0.5,  0.5,
 };
 
+GLfloat texcoords[] = {
+    /* for each y, 1 - y was done to account for the bottom-left thing */
+    1.0, 0.0,
+    1.0, 1.0,
+    0.0, 1.0,
+    0.0, 0.0,
+};
+
 int initGL() {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, "standard.vert");
     GLuint fragShader = loadShader(GL_FRAGMENT_SHADER, "standard.frag");
     program = createProgram(vertexShader, fragShader);
 
-    const char* attrName = "coord2d";
-    attrCoords = glGetAttribLocation(program, attrName);
-    if (attrCoords == -1) {
-        fprintf(stderr, "Could not bind attribute %s\n", attrName);
+    attrCoord = glGetAttribLocation(program, "coord");
+    if (attrCoord == -1) {
+        fprintf(stderr, "Could not bind attribute \"coord\"\n");
+        return 0;
+    }
+
+    attrTexcoord = glGetAttribLocation(program, "texcoord");
+    if (attrTexcoord == -1) {
+        fprintf(stderr, "Could not bind attribute \"texcoord\"\n");
+        return 0;
+    }
+
+    uniformTexture = glGetUniformLocation(program, "mytexture");
+    if (uniformTexture == -1) {
+        fprintf(stderr, "Could not bind uniform \"mytexture\"\n");
         return 0;
     }
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &vboTexcoords);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     texture = loadTexture("grass.png");
@@ -42,12 +66,18 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(program);
-    glEnableVertexAttribArray(attrCoords);
+    glEnableVertexAttribArray(attrCoord);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(attrCoords, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(attrCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glUniform1i(uniformTexture, 0);
+    glEnableVertexAttribArray(attrTexcoord);
+    glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
+    glVertexAttribPointer(attrTexcoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
     glDrawArrays(GL_QUADS, 0, 4);
-    glDisableVertexAttribArray(attrCoords);
+    glDisableVertexAttribArray(attrCoord);
+    glDisableVertexAttribArray(attrTexcoord);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glutSwapBuffers();
