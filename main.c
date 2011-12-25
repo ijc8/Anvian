@@ -63,6 +63,8 @@ GLfloat texcoords[] = {
 };
 
 int initGL() {
+    glDisable(GL_CULL_FACE);
+
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
