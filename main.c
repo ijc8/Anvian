@@ -5,7 +5,8 @@
 
 GLuint program;
 GLuint coordAttr, texcoordAttr;
-GLuint texture, textureUniform;
+GLuint grassSideTex, grassTopTex;
+GLuint textureUniform;
 GLuint vbo, vboTexcoords;
 
 GLuint zNearUniform;
@@ -35,31 +36,42 @@ GLfloat vertices[] = {
    0.5,  0.5, -0.5,
   -0.5,  0.5, -0.5,
   -0.5, -0.5, -0.5,
-   0.5, -0.5, -0.5,   
+   0.5, -0.5, -0.5,
+
+   /* top (uses different texture) */
+  -0.5, 0.5, -0.5,
+   0.5, 0.5, -0.5,
+   0.5, 0.5,  0.5,
+  -0.5, 0.5, 0.5,
 };
 
 GLfloat texcoords[] = {
     /* for each y, 1 - y was done to account for the bottom-left thing */
     0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
+    0.5, 0.0,
+    0.5, 1.0,
     0.0, 1.0,
 
     /* repeat */
     0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
+    0.5, 0.0,
+    0.5, 1.0,
     0.0, 1.0,
 
     0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
+    0.5, 0.0,
+    0.5, 1.0,
     0.0, 1.0,
 
     0.0, 0.0,
+    0.5, 0.0,
+    0.5, 1.0,
+    0.0, 1.0,
+
+    0.5, 0.0,
     1.0, 0.0,
     1.0, 1.0,
-    0.0, 1.0,
+    0.5, 1.0,
 };
 
 int initGL() {
@@ -126,7 +138,7 @@ int initGL() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    texture = loadTexture("grass.png");
+    grassSideTex = loadTexture("terrain.png");
 
     return 1;
 }
@@ -146,7 +158,7 @@ void display() {
     glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
     glVertexAttribPointer(texcoordAttr, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glDrawArrays(GL_QUADS, 0, 16);
+    glDrawArrays(GL_QUADS, 0, 20);
     glDisableVertexAttribArray(coordAttr);
     glDisableVertexAttribArray(texcoordAttr);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
