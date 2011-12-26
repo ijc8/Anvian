@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(400, 400);
-    glutCreateWindow("Lyx Episode V: OpenGL Strikes Back!");
+    glutCreateWindow("Anvian");
 
     GLenum err = glewInit();
     if (err != GLEW_OK) {
