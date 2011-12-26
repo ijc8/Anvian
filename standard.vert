@@ -9,7 +9,7 @@ uniform float zFar;
 uniform float frustumScale;
 
 void main() {
-    vec4 offset = vec4(-1.0, -1.0, -2.5, 0.0);
+    vec4 offset = vec4(-1.0, 1.0, -2.5, 0.0);
     vec4 cameraPos = vec4(coord, 1.0) + offset;
     vec4 clipPos;
 

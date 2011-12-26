@@ -5,11 +5,11 @@
 #include "util.h"
 
 #define TEXMAP_WIDTH 2
-#define TEXMAP_HEIGHT 1
+#define TEXMAP_HEIGHT 2
 
 GLuint program;
 GLuint coordAttr, texcoordAttr;
-GLuint grassSideTex, grassTopTex;
+GLuint texture;
 GLuint textureUniform;
 GLuint vbo, vboTexcoords;
 
@@ -47,12 +47,18 @@ GLfloat vertices[] = {
     0.5, 0.5, -0.5,
     0.5, 0.5,  0.5,
    -0.5, 0.5,  0.5,
+
+    /* bottom (uses different texture) */
+   -0.5, -0.5,  0.5,
+    0.5, -0.5,  0.5,
+    0.5, -0.5, -0.5,
+   -0.5, -0.5, -0.5,
 };
 
 /* order: front, left, right, back, top (and bottom, when that's added) */
-int sides[] = { 0, 0, 0, 0, 1 };
+int sides[] = { 1, 1, 1, 1, 2, 0 };
 
-GLfloat texcoords[4 * 2 * 5];
+GLfloat texcoords[4 * 2 * 6];
 
 int initGL() {
     glEnable(GL_DEPTH_TEST);
@@ -90,7 +96,7 @@ int initGL() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     int i;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 6; i++) {
         float x = (float)(sides[i] % TEXMAP_WIDTH) / TEXMAP_WIDTH;
         float endX = x + (1.0 / TEXMAP_WIDTH);
         float y = (float)(sides[i] / TEXMAP_WIDTH) / TEXMAP_WIDTH;
@@ -115,7 +121,7 @@ int initGL() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    grassSideTex = loadTexture("terrain.png");
+    texture = loadTexture("terrain.png");
 
     return 1;
 }
@@ -135,7 +141,7 @@ void display() {
     glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
     glVertexAttribPointer(texcoordAttr, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glDrawArrays(GL_QUADS, 0, 20);
+    glDrawArrays(GL_QUADS, 0, 24);
     glDisableVertexAttribArray(coordAttr);
     glDisableVertexAttribArray(texcoordAttr);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
