@@ -1,7 +1,11 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+#include <assert.h>
 #include "util.h"
+
+#define TEXMAP_WIDTH 2
+#define TEXMAP_HEIGHT 1
 
 GLuint program;
 GLuint coordAttr, texcoordAttr;
@@ -20,63 +24,37 @@ GLfloat vertices[] = {
     0.5, -0.5, 0.5,
    -0.5, -0.5, 0.5,
 
-   /* left */
-  -0.5,  0.5, -0.5,
-  -0.5,  0.5,  0.5,
-  -0.5, -0.5,  0.5,
-  -0.5, -0.5, -0.5,
+    /* left */
+   -0.5,  0.5, -0.5,
+   -0.5,  0.5,  0.5,
+   -0.5, -0.5,  0.5,
+   -0.5, -0.5, -0.5,
     
-   /* right */
-   0.5,  0.5,  0.5,
-   0.5,  0.5, -0.5,
-   0.5, -0.5, -0.5,
-   0.5, -0.5,  0.5,
+    /* right */
+    0.5,  0.5,  0.5,
+    0.5,  0.5, -0.5,
+    0.5, -0.5, -0.5,
+    0.5, -0.5,  0.5,
 
-   /* back */
-   0.5,  0.5, -0.5,
-  -0.5,  0.5, -0.5,
-  -0.5, -0.5, -0.5,
-   0.5, -0.5, -0.5,
+    /* back */
+    0.5,  0.5, -0.5,
+   -0.5,  0.5, -0.5,
+   -0.5, -0.5, -0.5,
+    0.5, -0.5, -0.5,
 
-   /* top (uses different texture) */
-  -0.5, 0.5, -0.5,
-   0.5, 0.5, -0.5,
-   0.5, 0.5,  0.5,
-  -0.5, 0.5, 0.5,
+    /* top (uses different texture) */
+   -0.5, 0.5, -0.5,
+    0.5, 0.5, -0.5,
+    0.5, 0.5,  0.5,
+   -0.5, 0.5,  0.5,
 };
 
-GLfloat texcoords[] = {
-    /* for each y, 1 - y was done to account for the bottom-left thing */
-    0.0, 0.0,
-    0.5, 0.0,
-    0.5, 1.0,
-    0.0, 1.0,
+/* order: front, left, right, back, top (and bottom, when that's added) */
+int sides[] = { 0, 0, 0, 0, 1 };
 
-    /* repeat */
-    0.0, 0.0,
-    0.5, 0.0,
-    0.5, 1.0,
-    0.0, 1.0,
-
-    0.0, 0.0,
-    0.5, 0.0,
-    0.5, 1.0,
-    0.0, 1.0,
-
-    0.0, 0.0,
-    0.5, 0.0,
-    0.5, 1.0,
-    0.0, 1.0,
-
-    0.5, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.5, 1.0,
-};
+GLfloat texcoords[4 * 2 * 5];
 
 int initGL() {
-    glDisable(GL_CULL_FACE);
-
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
@@ -87,40 +65,19 @@ int initGL() {
     program = createProgram(vertexShader, fragShader);
 
     coordAttr = glGetAttribLocation(program, "coord");
-    if (coordAttr == -1) {
-        fprintf(stderr, "Could not bind attribute \"coord\"\n");
-        return 0;
-    }
-
     texcoordAttr = glGetAttribLocation(program, "texcoord");
-    if (texcoordAttr == -1) {
-        fprintf(stderr, "Could not bind attribute \"texcoord\"\n");
-        return 0;
-    }
 
     textureUniform = glGetUniformLocation(program, "mytexture");
-    if (textureUniform == -1) {
-        fprintf(stderr, "Could not bind uniform \"mytexture\"\n");
-        return 0;
-    }
-
     zNearUniform = glGetUniformLocation(program, "zNear");
-    if (zNearUniform == -1) {
-        fprintf(stderr, "Could not bind uniform \"zNear\"\n");
-        return 0;
-    }
-
     zFarUniform = glGetUniformLocation(program, "zFar");
-    if (zFarUniform == -1) {
-        fprintf(stderr, "Could not bind uniform \"zFar\"\n");
-        return 0;
-    }
-
     frustumScaleUniform = glGetUniformLocation(program, "frustumScale");
-    if (frustumScaleUniform == -1) {
-        fprintf(stderr, "Could not bind uniform \"frustumScale\"\n");
-        return 0;
-    }
+
+    assert(coordAttr != -1);
+    assert(texcoordAttr != -1);
+    assert(textureUniform != -1);
+    assert(zNearUniform != -1);
+    assert(zFarUniform != -1);
+    assert(frustumScaleUniform != -1);
 
     glUseProgram(program);
     glUniform1f(frustumScaleUniform, 1.0f);
@@ -131,6 +88,26 @@ int initGL() {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    int i;
+    for (i = 0; i < 5; i++) {
+        float x = (float)(sides[i] % TEXMAP_WIDTH) / TEXMAP_WIDTH;
+        float endX = x + (1.0 / TEXMAP_WIDTH);
+        float y = (float)(sides[i] / TEXMAP_WIDTH) / TEXMAP_WIDTH;
+        float endY = y + (1.0 / TEXMAP_HEIGHT);
+
+        texcoords[i*8+0] = x;
+        texcoords[i*8+1] = y;
+
+        texcoords[i*8+2] = endX;
+        texcoords[i*8+3] = y;
+
+        texcoords[i*8+4] = endX;
+        texcoords[i*8+5] = endY;
+
+        texcoords[i*8+6] = x;
+        texcoords[i*8+7] = endY;
+    }
 
     glGenBuffers(1, &vboTexcoords);
     glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
