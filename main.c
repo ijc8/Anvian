@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include "util.h"
 
@@ -13,9 +14,8 @@ GLuint texture;
 GLuint textureUniform;
 GLuint vbo, vboTexcoords;
 
-GLuint zNearUniform;
-GLuint zFarUniform;
-GLuint frustumScaleUniform;
+GLfloat matrix[4][4];
+GLuint matrixUniform;
 
 GLfloat vertices[] = {
     /* front */
@@ -73,22 +73,26 @@ int initGL() {
     coordAttr = glGetAttribLocation(program, "coord");
     texcoordAttr = glGetAttribLocation(program, "texcoord");
 
-    textureUniform = glGetUniformLocation(program, "mytexture");
-    zNearUniform = glGetUniformLocation(program, "zNear");
-    zFarUniform = glGetUniformLocation(program, "zFar");
-    frustumScaleUniform = glGetUniformLocation(program, "frustumScale");
+    matrixUniform = glGetUniformLocation(program, "matrix");
 
     assert(coordAttr != -1);
     assert(texcoordAttr != -1);
-    assert(textureUniform != -1);
-    assert(zNearUniform != -1);
-    assert(zFarUniform != -1);
-    assert(frustumScaleUniform != -1);
+    assert(matrixUniform != -1);
+
+    int frustumScale = 1;
+    int zNear = 1;
+    int zFar = 3;
+
+    memset(matrix, 0, sizeof(float) * 16);
+
+    matrix[0][0] = frustumScale;
+    matrix[1][1] = frustumScale;
+    matrix[2][2] = (zFar + zNear) / (zNear - zFar);
+    matrix[2][3] = (2 * zFar * zNear) / (zNear - zFar);
+    matrix[3][2] = -1;
 
     glUseProgram(program);
-    glUniform1f(frustumScaleUniform, 1.0f);
-    glUniform1f(zNearUniform, 1.0f);
-    glUniform1f(zFarUniform, 3.0f);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, (GLfloat *)matrix);
     glUseProgram(0);
 
     glGenBuffers(1, &vbo);
