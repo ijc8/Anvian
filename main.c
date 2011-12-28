@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include "util.h"
+#include "matrix.h"
 
 #define TEXMAP_WIDTH 2
 #define TEXMAP_HEIGHT 2
@@ -14,7 +15,7 @@ GLuint texture;
 GLuint textureUniform;
 GLuint vbo, vboTexcoords;
 
-GLfloat matrix[4][4];
+GLfloat theMatrix[4][4];
 GLuint matrixUniform;
 
 GLfloat vertices[] = {
@@ -83,16 +84,16 @@ int initGL() {
     int zNear = 1;
     int zFar = 3;
 
-    memset(matrix, 0, sizeof(float) * 16);
+    memset(theMatrix, 0, sizeof(float) * 16);
 
-    matrix[0][0] = frustumScale;
-    matrix[1][1] = frustumScale;
-    matrix[2][2] = (zFar + zNear) / (zNear - zFar);
-    matrix[2][3] = (2 * zFar * zNear) / (zNear - zFar);
-    matrix[3][2] = -1;
+    theMatrix[0][0] = frustumScale;
+    theMatrix[1][1] = frustumScale;
+    theMatrix[2][2] = (zFar + zNear) / (zNear - zFar);
+    theMatrix[2][3] = (2 * zFar * zNear) / (zNear - zFar);
+    theMatrix[3][2] = -1;
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, (GLfloat *)matrix);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, (GLfloat *)theMatrix);
     glUseProgram(0);
 
     glGenBuffers(1, &vbo);
@@ -168,6 +169,38 @@ int main(int argc, char **argv) {
 
     if (!initGL())
         return 1;
+
+    float data1[2][3] = {
+        {  1, 0, 2 },
+        { -1, 3, 1 },
+    };
+
+    float data2[3][2] = {
+        { 3, 1 },
+        { 2, 1 },
+        { 1, 0 },        
+    };
+
+    matrix m1 = makeMatrix((float *)data1, 2, 3);
+    matrix m2 = makeMatrix((float *)data2, 3, 2);
+    puts("m1:");
+    printMatrix(m1);
+    puts("m2:");
+    printMatrix(m2);
+    putchar('\n');
+
+    /* NOTE: Don't do what happens next. Could easily cause a memory leak,
+     * because multiply() makes a new matrix with its own malloc()'d space.
+     */
+    puts("m1 * m2:");
+    printMatrix(multiply(m1, m2));
+    puts("m2 * m1:");
+    printMatrix(multiply(m2, m1));
+    putchar('\n');
+
+    matrix m = identity(4);
+    puts("identity(4):");
+    printMatrix(m);
 
     glutDisplayFunc(display);
     glutMainLoop();
