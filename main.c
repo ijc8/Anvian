@@ -55,7 +55,7 @@ GLfloat vertices[] = {
    -0.5, -0.5, -0.5,
 };
 
-/* order: front, left, right, back, top (and bottom, when that's added) */
+/* order: front, left, right, back, top, and bottom */
 int sides[] = { 1, 1, 1, 1, 2, 0 };
 
 GLfloat texcoords[4 * 2 * 6];
@@ -83,12 +83,16 @@ int initGL() {
     int zNear = 1;
     int zFar = 3;
 
-    matrix m = perspective(frustumScale, zNear, zFar);
+    matrix p = perspective(frustumScale, zNear, zFar);
+    matrix t = translate(-1, 1, -2.5);
+    matrix m = multiply(p, t);
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, m.data);
+    glUniformMatrix4fv(matrixUniform, 1, GL_TRUE, m.data);
     glUseProgram(0);
 
+    free(p.data);
+    free(t.data);
     free(m.data);
 
     glGenBuffers(1, &vbo);
@@ -164,38 +168,6 @@ int main(int argc, char **argv) {
 
     if (!initGL())
         return 1;
-
-    float data1[2][3] = {
-        {  1, 0, 2 },
-        { -1, 3, 1 },
-    };
-
-    float data2[3][2] = {
-        { 3, 1 },
-        { 2, 1 },
-        { 1, 0 },        
-    };
-
-    matrix m1 = makeMatrix((float *)data1, 2, 3);
-    matrix m2 = makeMatrix((float *)data2, 3, 2);
-    puts("m1:");
-    printMatrix(m1);
-    puts("m2:");
-    printMatrix(m2);
-    putchar('\n');
-
-    /* NOTE: Don't do what happens next. Could easily cause a memory leak,
-     * because multiply() makes a new matrix with its own malloc()'d space.
-     */
-    puts("m1 * m2:");
-    printMatrix(multiply(m1, m2));
-    puts("m2 * m1:");
-    printMatrix(multiply(m2, m1));
-    putchar('\n');
-
-    matrix m = identity(4);
-    puts("identity(4):");
-    printMatrix(m);
 
     glutDisplayFunc(display);
     glutMainLoop();
