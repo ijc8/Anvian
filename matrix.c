@@ -11,13 +11,18 @@ matrix makeMatrix(float *data, int rows, int columns) {
     return mat;
 }
 
+matrix emptyMatrix(int rows, int columns) {
+    float *data = malloc(rows * columns * sizeof(float));
+    memset(data, 0, rows * columns * sizeof(float));
+    return makeMatrix(data, rows, columns);
+}
+
 matrix identity(int size) {
-    float *data = malloc(size * size * sizeof(float));
-    memset(data, 0, size * size * sizeof(float));
+    matrix result = emptyMatrix(size, size);
     int i;
     for (i = 0; i < size; i++)
-        data[i*size+i] = 1;
-    return makeMatrix(data, size, size);
+        result.data[i*size+i] = 1;
+    return result;
 }
 
 matrix multiply(matrix a, matrix b) {
@@ -35,6 +40,26 @@ matrix multiply(matrix a, matrix b) {
         }
     }
     return makeMatrix(data, a.rows, b.columns);          
+}
+
+matrix translate(float x, float y, float z) {
+    matrix result = identity(4);
+    result.data[4*0+3] = x;
+    result.data[4*1+3] = y;
+    result.data[4*2+3] = z;
+    return result;
+}
+
+matrix perspective(float frustumScale, float zNear, float zFar) {
+    matrix result = emptyMatrix(4, 4);
+
+    result.data[4*0+0] = frustumScale;
+    result.data[4*1+1] = frustumScale;
+    result.data[4*2+2] = (zFar + zNear) / (zNear - zFar);
+    result.data[4*2+3] = (2 * zFar * zNear) / (zNear - zFar);
+    result.data[4*3+2] = -1;
+
+    return result;
 }
 
 void printMatrix(matrix m) {

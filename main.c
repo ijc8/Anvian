@@ -15,7 +15,6 @@ GLuint texture;
 GLuint textureUniform;
 GLuint vbo, vboTexcoords;
 
-GLfloat theMatrix[4][4];
 GLuint matrixUniform;
 
 GLfloat vertices[] = {
@@ -84,17 +83,13 @@ int initGL() {
     int zNear = 1;
     int zFar = 3;
 
-    memset(theMatrix, 0, sizeof(float) * 16);
-
-    theMatrix[0][0] = frustumScale;
-    theMatrix[1][1] = frustumScale;
-    theMatrix[2][2] = (zFar + zNear) / (zNear - zFar);
-    theMatrix[2][3] = (2 * zFar * zNear) / (zNear - zFar);
-    theMatrix[3][2] = -1;
+    matrix m = perspective(frustumScale, zNear, zFar);
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, (GLfloat *)theMatrix);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, m.data);
     glUseProgram(0);
+
+    free(m.data);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
