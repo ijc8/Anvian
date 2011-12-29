@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <SDL/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,6 +7,19 @@
 float degToRad(float degree) {
     const float fdegToRad = 3.14159265 * 2 / 360;
     return degree * fdegToRad;
+}
+
+glm::vec3 sphericalToEuclidean(glm::vec3 sphereCoords) {
+    	float phi = degToRad(sphereCoords.x);
+	float theta = degToRad(sphereCoords.y + 90.0f);
+
+	float sinTheta = sinf(theta);
+	float cosTheta = cosf(theta);
+	float cosPhi = cosf(phi);
+	float sinPhi = sinf(phi);
+
+        glm::vec3 dir(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
+        return (dir * sphereCoords.z);
 }
 
 char *readFile(const char *filename) {

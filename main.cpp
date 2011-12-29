@@ -84,17 +84,8 @@ glm::mat4 calcLookAtMatrix(const glm::vec3 &cameraPt, const glm::vec3 &centerPt,
     return rotMat * transMat;
 }
 
-glm::vec3 resolveCamPosition() {
-	float phi = degToRad(cameraSpherePos.x);
-	float theta = degToRad(cameraSpherePos.y + 90.0f);
-
-	float fSinTheta = sinf(theta);
-	float fCosTheta = cosf(theta);
-	float fCosPhi = cosf(phi);
-	float fSinPhi = sinf(phi);
-
-	glm::vec3 dirToCamera(fSinTheta * fCosPhi, fCosTheta, fSinTheta * fSinPhi);
-	return (dirToCamera * cameraSpherePos.z) + cameraPos;
+glm::vec3 calcCameraPosition() {
+    return sphericalToEuclidean(cameraSpherePos) + cameraPos;
 }
 
 int initGL() {
@@ -121,7 +112,7 @@ int initGL() {
 
     glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
     glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
+    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glUseProgram(program);
     glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
@@ -188,22 +179,22 @@ void display() {
 void keyboard(unsigned char key, int x, int y) {
     switch (key) {
     case 'w':
-        cameraPos.x += 0.5;
+        cameraPos += (calcCameraPosition() - cameraPos) * 0.1f;
         break;
     case 's':
-        cameraPos.x -= 0.5;
+        cameraPos -= (calcCameraPosition() - cameraPos) * 0.1f;
         break;
     case 'a':
-        cameraPos.z += 0.5;
+        cameraPos -= sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z)) * 0.1f;
         break;
     case 'd':
-        cameraPos.z -= 0.5;
+        cameraPos += sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z)) * 0.1f;
         break;
     };
 
     glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
     glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
+    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glUseProgram(program);
     glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
@@ -229,7 +220,7 @@ void keyboardSpecial(int key, int x, int y) {
 
     glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
     glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
+    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glUseProgram(program);
     glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
@@ -251,6 +242,8 @@ int main(int argc, char **argv) {
         return 1;
     }
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    if (!GLEW_VERSION_2_0)
+        fprintf(stderr, "You don't even support OpenGL 2.0?! Well, this almost certainly won't work, then.\n");
 
     if (!initGL())
         return 1;
