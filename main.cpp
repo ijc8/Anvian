@@ -154,11 +154,17 @@ int initGL() {
 }
 
 void display() {
+    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
+    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
+    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
+
     glClearColor(0.53, 0.8, 0.98, 1.0);
     glClearDepth(1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(program);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
+
     glEnableVertexAttribArray(coordAttr);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glVertexAttribPointer(coordAttr, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -192,14 +198,6 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     };
 
-    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
-    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
-
-    glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
-    glUseProgram(0);
-
     glutPostRedisplay();
 }
 
@@ -218,16 +216,7 @@ void keyboardSpecial(int key, int x, int y) {
         cameraSpherePos.x -= 2;
     };
 
-    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
-    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
-
-    glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
-    glUseProgram(0);
-
     glutPostRedisplay();
-
 }
 
 int main(int argc, char **argv) {
