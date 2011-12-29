@@ -1,10 +1,12 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include "util.h"
-#include "matrix.h"
 
 #define TEXMAP_WIDTH 2
 #define TEXMAP_HEIGHT 2
@@ -82,21 +84,12 @@ int initGL() {
     assert(texcoordAttr != (unsigned)-1);
     assert(matrixUniform != (unsigned)-1);
 
-    int frustumScale = 1;
-    int zNear = 1;
-    int zFar = 3;
-
-    matrix p = perspective(frustumScale, zNear, zFar);
-    matrix t = translate(-1, 1, -2.5);
-    matrix m = multiply(p, t);
+    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
+    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_TRUE, m.data);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(translation));
     glUseProgram(0);
-
-    free(p.data);
-    free(t.data);
-    free(m.data);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
