@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+float degToRad(float degree) {
+    const float fdegToRad = 3.14159265 * 2 / 360;
+    return degree * fdegToRad;
+}
+
 char *readFile(const char *filename) {
     FILE *file = fopen(filename, "r");
     long size;

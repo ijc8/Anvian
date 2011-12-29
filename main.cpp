@@ -15,9 +15,11 @@ GLuint program;
 GLuint coordAttr, texcoordAttr;
 GLuint texture;
 GLuint textureUniform;
+GLuint matrixUniform;
 GLuint vbo, vboTexcoords;
 
-GLuint matrixUniform;
+glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraSpherePos(0.0f, 0.0f, 1.0f);
 
 GLfloat vertices[] = {
     /* front */
@@ -62,6 +64,39 @@ int sides[] = { 1, 1, 1, 1, 2, 0 };
 
 GLfloat texcoords[4 * 2 * 6];
 
+glm::mat4 calcLookAtMatrix(const glm::vec3 &cameraPt, const glm::vec3 &centerPt, const glm::vec3 &upPt) {
+    glm::vec3 lookDir = glm::normalize(cameraPt - centerPt);
+    glm::vec3 upDir = glm::normalize(upPt);
+
+    glm::vec3 rightDir = glm::normalize(glm::cross(lookDir, upDir));
+    glm::vec3 perpUpDir = glm::cross(rightDir, lookDir);
+
+    glm::mat4 rotMat(1.0f);
+    rotMat[0] = glm::vec4(rightDir, 0.0f);
+    rotMat[1] = glm::vec4(perpUpDir, 0.0f);
+    rotMat[2] = glm::vec4(-lookDir, 0.0f);
+
+    rotMat = glm::transpose(rotMat);
+
+    glm::mat4 transMat(1.0f);
+    transMat[3] = glm::vec4(-cameraPt, 1.0f);
+
+    return rotMat * transMat;
+}
+
+glm::vec3 resolveCamPosition() {
+	float phi = degToRad(cameraSpherePos.x);
+	float theta = degToRad(cameraSpherePos.y + 90.0f);
+
+	float fSinTheta = sinf(theta);
+	float fCosTheta = cosf(theta);
+	float fCosPhi = cosf(phi);
+	float fSinPhi = sinf(phi);
+
+	glm::vec3 dirToCamera(fSinTheta * fCosPhi, fCosTheta, fSinTheta * fSinPhi);
+	return (dirToCamera * cameraSpherePos.z) + cameraPos;
+}
+
 int initGL() {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -86,9 +121,10 @@ int initGL() {
 
     glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
     glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
+    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(translation));
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
     glUseProgram(0);
 
     glGenBuffers(1, &vbo);
@@ -149,6 +185,35 @@ void display() {
     glutSwapBuffers();
 }
 
+void keyboard(unsigned char key, int x, int y) {
+    switch (key) {
+    case 'w':
+        cameraPos.x += 0.5;
+        p        break;
+    case 's':
+        cameraPos.x -= 0.5;
+        break;
+    case 'a':
+        cameraPos.z += 0.5;
+        break;
+    case 'd':
+        cameraPos.z -= 0.5;
+        break;
+    };
+
+    printf("key: %c\n", key);
+
+    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
+    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
+    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
+
+    glUseProgram(program);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
+    glUseProgram(0);
+
+    glutPostRedisplay();
+}
+
 int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -166,6 +231,7 @@ int main(int argc, char **argv) {
         return 1;
 
     glutDisplayFunc(display);
+    glutKeyboardFunc(keyboard);
     glutMainLoop();
 
     return 0;
