@@ -189,7 +189,7 @@ void keyboard(unsigned char key, int x, int y) {
     switch (key) {
     case 'w':
         cameraPos.x += 0.5;
-        p        break;
+        break;
     case 's':
         cameraPos.x -= 0.5;
         break;
@@ -201,7 +201,31 @@ void keyboard(unsigned char key, int x, int y) {
         break;
     };
 
-    printf("key: %c\n", key);
+    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
+    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
+    glm::mat4 matrix = translation * calcLookAtMatrix(resolveCamPosition(), cameraPos, glm::vec3(0, 1, 0));
+
+    glUseProgram(program);
+    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
+    glUseProgram(0);
+
+    glutPostRedisplay();
+}
+
+void keyboardSpecial(int key, int x, int y) {
+    switch (key) {
+    case GLUT_KEY_UP:
+        cameraSpherePos.y += 2;
+        break;
+    case GLUT_KEY_DOWN:
+        cameraSpherePos.y -= 2;
+        break;
+    case GLUT_KEY_LEFT:
+        cameraSpherePos.x += 2;
+        break;
+    case GLUT_KEY_RIGHT:
+        cameraSpherePos.x -= 2;
+    };
 
     glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
     glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
@@ -212,6 +236,7 @@ void keyboard(unsigned char key, int x, int y) {
     glUseProgram(0);
 
     glutPostRedisplay();
+
 }
 
 int main(int argc, char **argv) {
@@ -232,6 +257,7 @@ int main(int argc, char **argv) {
 
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(keyboardSpecial);
     glutMainLoop();
 
     return 0;
