@@ -12,7 +12,7 @@ char *readFile(const char *filename) {
     size = ftell(file);
     rewind(file);
 
-    buffer = malloc(size + 1);
+    buffer = (char *)malloc(size + 1);
     fread(buffer, size, 1, file);
     fclose(file);
     buffer[size] = '\0';
@@ -35,7 +35,7 @@ GLuint loadShader(GLenum shaderType, const char *filename) {
         GLint infoLogLength;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        GLchar *strInfoLog = malloc(infoLogLength + 1);
+        GLchar *strInfoLog = (GLchar *)malloc(infoLogLength + 1);
         glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
 
         fprintf(stderr, "Compile failure in shader file \"%s\". Error:\n%s\n",
@@ -60,7 +60,7 @@ GLuint createProgram(GLuint vertexShader, GLuint fragShader) {
         GLint infoLogLength;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-        GLchar *strInfoLog = malloc(infoLogLength + 1);
+        GLchar *strInfoLog = (char *)malloc(infoLogLength + 1);
         glGetProgramInfoLog(program, infoLogLength, NULL, strInfoLog);
         fprintf(stderr, "Linker failure: %s\n", strInfoLog);
         free(strInfoLog);

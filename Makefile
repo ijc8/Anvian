@@ -1,8 +1,8 @@
-CC=gcc
+CC=g++
 OPTS=-Wall
 LIBS=-lglut -lGLEW -lGL -lSDL -lSDL_image
-SOURCES=main.c util.c matrix.c
-HEADERS=util.h
+SOURCES=main.cpp util.cpp matrix.cpp
+HEADERS=util.h matrix.h
 
 all: $(SOURCES) $(HEADERS)
 	$(CC) $(OPTS) $(LIBS) -o main $(SOURCES)

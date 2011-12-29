@@ -75,9 +75,12 @@ int initGL() {
 
     matrixUniform = glGetUniformLocation(program, "matrix");
 
-    assert(coordAttr != -1);
-    assert(texcoordAttr != -1);
-    assert(matrixUniform != -1);
+    /* the conversion seems silly, but I get a warning (comparing signed
+     * and unsigned) otherwise
+     */
+    assert(coordAttr != (unsigned)-1);
+    assert(texcoordAttr != (unsigned)-1);
+    assert(matrixUniform != (unsigned)-1);
 
     int frustumScale = 1;
     int zNear = 1;

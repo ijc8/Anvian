@@ -14,7 +14,7 @@ matrix makeMatrix(float *data, int rows, int columns) {
 }
 
 matrix emptyMatrix(int rows, int columns) {
-    float *data = malloc(rows * columns * sizeof(float));
+    float *data = (float *)malloc(rows * columns * sizeof(float));
     memset(data, 0, rows * columns * sizeof(float));
     return makeMatrix(data, rows, columns);
 }
@@ -30,7 +30,7 @@ matrix identity(int size) {
 matrix multiply(matrix a, matrix b) {
     if (a.columns != b.rows)
         return (matrix){0};
-    matrix result = makeMatrix(malloc(a.rows * b.columns * sizeof(float)),
+    matrix result = makeMatrix((float *)malloc(a.rows * b.columns * sizeof(float)),
                                a.rows, b.columns);
     int r, c;
     for (r = 0; r < a.rows; r++) {
