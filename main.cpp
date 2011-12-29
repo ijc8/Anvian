@@ -18,7 +18,9 @@ GLuint textureUniform;
 GLuint matrixUniform;
 GLuint vbo, vboTexcoords;
 
-glm::vec3 cameraPos(0.0f, 0.0f, 0.0f);
+glm::mat4 projection;
+
+glm::vec3 cameraPos(-2.5f, 0.0f, 0.0f);
 glm::vec3 cameraSpherePos(0.0f, 0.0f, 1.0f);
 
 GLfloat vertices[] = {
@@ -110,14 +112,6 @@ int initGL() {
     assert(texcoordAttr != (unsigned)-1);
     assert(matrixUniform != (unsigned)-1);
 
-    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
-    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
-
-    glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
-    glUseProgram(0);
-
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -153,10 +147,14 @@ int initGL() {
     return 1;
 }
 
+void reshape(int w, int h) {
+    projection = glm::perspective(90.0f, (float)w / h, 1.0f, 100.0f);
+    glViewport(0, 0, w, h);
+    glutPostRedisplay();
+}
+
 void display() {
-    glm::mat4 projection = glm::perspective(90.0f, 1.0f, 1.0f, 3.0f);
-    glm::mat4 translation = glm::translate(projection, glm::vec3(-1, 1, -2.5));
-    glm::mat4 matrix = translation * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
+    glm::mat4 matrix = projection * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glClearColor(0.53, 0.8, 0.98, 1.0);
     glClearDepth(1.0);
@@ -237,6 +235,7 @@ int main(int argc, char **argv) {
     if (!initGL())
         return 1;
 
+    glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(keyboardSpecial);
