@@ -200,10 +200,10 @@ void keyboard(unsigned char key, int x, int y) {
 void keyboardSpecial(int key, int x, int y) {
     switch (key) {
     case GLUT_KEY_UP:
-        cameraSpherePos.y += 2;
+        cameraSpherePos.y -= 2;
         break;
     case GLUT_KEY_DOWN:
-        cameraSpherePos.y -= 2;
+        cameraSpherePos.y += 2;
         break;
     case GLUT_KEY_LEFT:
         cameraSpherePos.x -= 2;
@@ -234,6 +234,10 @@ int main(int argc, char **argv) {
         return 1;
 
     chunk.blocks[0][0][0] = 1;
+    chunk.blocks[0][0][1] = 1;
+    chunk.blocks[0][1][0] = 1;
+    chunk.blocks[1][0][0] = 1;
+    chunk.blocks[3][3][3] = 1;
 
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);

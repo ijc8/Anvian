@@ -25,7 +25,7 @@ void Chunk::render() {
         for (int y = 0; y < YBlocks; y++) {
             for (int z = 0; z < ZBlocks; z++) {
                 if (blocks[x][y][z]) {
-                    glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.1 + pos.x * XBlocks, y * 1.1 + pos.y * YBlocks, z * 1.1 + pos.z * ZBlocks));
+                    glm::mat4 translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1 + pos.x * XBlocks, y * 1 + pos.y * YBlocks, z * 1 + pos.z * ZBlocks));
                     glUniformMatrix4fv(worldMatUniform, 1, GL_FALSE, glm::value_ptr(translateMatrix));
                     glDrawArrays(GL_QUADS, 0, 24);
                 }
