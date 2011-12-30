@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "util.h"
 #include "chunk.h"
 
@@ -109,14 +108,6 @@ int initGL() {
 
     worldMatUniform = glGetUniformLocation(program, "worldMatrix");
     cameraMatUniform = glGetUniformLocation(program, "cameraMatrix");
-
-    /* the conversion seems silly, but I get a warning (comparing signed
-     * and unsigned) otherwise
-     */
-    assert(coordAttr != (unsigned)-1);
-    assert(texcoordAttr != (unsigned)-1);
-    assert(worldMatUniform != (unsigned)-1);
-    assert(cameraMatUniform != (unsigned)-1);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
