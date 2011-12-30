@@ -7,6 +7,7 @@
 #include <string.h>
 #include <assert.h>
 #include "util.h"
+#include "chunk.h"
 
 #define TEXMAP_WIDTH 2
 #define TEXMAP_HEIGHT 2
@@ -15,13 +16,16 @@ GLuint program;
 GLuint coordAttr, texcoordAttr;
 GLuint texture;
 GLuint textureUniform;
-GLuint matrixUniform;
+GLuint cameraMatUniform;
+GLuint worldMatUniform;
 GLuint vbo, vboTexcoords;
 
 glm::mat4 projection;
 
 glm::vec3 cameraPos(-2.5f, 0.0f, 0.0f);
 glm::vec3 cameraSpherePos(0.0f, 0.0f, 1.0f);
+
+Chunk chunk(0, 0, 0);
 
 GLfloat vertices[] = {
     /* front */
@@ -103,14 +107,16 @@ int initGL() {
     coordAttr = glGetAttribLocation(program, "coord");
     texcoordAttr = glGetAttribLocation(program, "texcoord");
 
-    matrixUniform = glGetUniformLocation(program, "matrix");
+    worldMatUniform = glGetUniformLocation(program, "worldMatrix");
+    cameraMatUniform = glGetUniformLocation(program, "cameraMatrix");
 
     /* the conversion seems silly, but I get a warning (comparing signed
      * and unsigned) otherwise
      */
     assert(coordAttr != (unsigned)-1);
     assert(texcoordAttr != (unsigned)-1);
-    assert(matrixUniform != (unsigned)-1);
+    assert(worldMatUniform != (unsigned)-1);
+    assert(cameraMatUniform != (unsigned)-1);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -154,14 +160,14 @@ void reshape(int w, int h) {
 }
 
 void display() {
-    glm::mat4 matrix = projection * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
+    glm::mat4 cameraMatrix = projection * calcLookAtMatrix(calcCameraPosition(), cameraPos, glm::vec3(0, 1, 0));
 
     glClearColor(0.53, 0.8, 0.98, 1.0);
     glClearDepth(1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(program);
-    glUniformMatrix4fv(matrixUniform, 1, GL_FALSE, glm::value_ptr(matrix));
+    glUniformMatrix4fv(cameraMatUniform, 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 
     glEnableVertexAttribArray(coordAttr);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -172,7 +178,8 @@ void display() {
     glBindBuffer(GL_ARRAY_BUFFER, vboTexcoords);
     glVertexAttribPointer(texcoordAttr, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glDrawArrays(GL_QUADS, 0, 24);
+    chunk.render();
+
     glDisableVertexAttribArray(coordAttr);
     glDisableVertexAttribArray(texcoordAttr);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -208,10 +215,10 @@ void keyboardSpecial(int key, int x, int y) {
         cameraSpherePos.y -= 2;
         break;
     case GLUT_KEY_LEFT:
-        cameraSpherePos.x += 2;
+        cameraSpherePos.x -= 2;
         break;
     case GLUT_KEY_RIGHT:
-        cameraSpherePos.x -= 2;
+        cameraSpherePos.x += 2;
     };
 
     glutPostRedisplay();
@@ -234,6 +241,8 @@ int main(int argc, char **argv) {
 
     if (!initGL())
         return 1;
+
+    chunk.blocks[0][0][0] = 1;
 
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
