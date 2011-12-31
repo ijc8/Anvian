@@ -22,7 +22,7 @@ GLuint vbo, vboTexcoords;
 glm::mat4 projection;
 
 glm::vec3 cameraPos(-2.5f, 0.0f, 0.0f);
-glm::vec3 cameraSpherePos(0.0f, 0.0f, 1.0f);
+glm::vec3 cameraSpherePos(0.0f, 0.0f, 0.5f);
 
 Chunk chunk(0, 0, 0);
 
@@ -147,7 +147,7 @@ int initGL() {
 }
 
 void reshape(int w, int h) {
-    projection = glm::perspective(90.0f, (float)w / h, 1.0f, 100.0f);
+    projection = glm::perspective(90.0f, (float)w / h, 0.1f, 100.0f);
     glViewport(0, 0, w, h);
     glutPostRedisplay();
 }
