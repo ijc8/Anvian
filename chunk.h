@@ -1,4 +1,5 @@
 #include <glm/glm.hpp>
+#include "blocks.h"
 
 class Chunk {
     public:
@@ -6,7 +7,7 @@ class Chunk {
         static const int YBlocks = 16;
         static const int ZBlocks = 16;
 
-        int ***blocks;
+        Block ****blocks;
 
         glm::ivec3 pos;
 

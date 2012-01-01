@@ -8,6 +8,7 @@
 #include "util.h"
 #include "chunk.h"
 #include "keyboard.h"
+#include "blocks.h"
 
 #define TEXMAP_WIDTH 2
 #define TEXMAP_HEIGHT 2
@@ -224,11 +225,11 @@ int main(int argc, char **argv) {
     if (!initGL())
         return 1;
 
-    chunk.blocks[0][0][0] = 1;
-    chunk.blocks[0][0][1] = 1;
-    chunk.blocks[0][1][0] = 1;
-    chunk.blocks[1][0][0] = 1;
-    chunk.blocks[3][3][3] = 1;
+    chunk.blocks[0][0][0] = &Blocks::dirt;
+    chunk.blocks[0][0][1] = &Blocks::dirt;
+    chunk.blocks[0][1][0] = &Blocks::dirt;
+    chunk.blocks[1][0][0] = &Blocks::dirt;
+    chunk.blocks[3][3][3] = &Blocks::dirt;
 
     Keyboard::init();
 
