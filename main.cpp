@@ -7,6 +7,7 @@
 #include <string.h>
 #include "util.h"
 #include "chunk.h"
+#include "keyboard.h"
 
 #define TEXMAP_WIDTH 2
 #define TEXMAP_HEIGHT 2
@@ -180,40 +181,28 @@ void display() {
     glutSwapBuffers();
 }
 
-void keyboard(unsigned char key, int x, int y) {
-    switch (key) {
-    case 'w':
-        cameraPos += (calcCameraPosition() - cameraPos) * 0.1f;
-        break;
-    case 's':
-        cameraPos -= (calcCameraPosition() - cameraPos) * 0.1f;
-        break;
-    case 'a':
-        cameraPos -= sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z)) * 0.1f;
-        break;
-    case 'd':
-        cameraPos += sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z)) * 0.1f;
-        break;
-    };
+void update(int time) {
+    if (Keyboard::keys['w'])
+        cameraPos += (calcCameraPosition() - cameraPos) * 0.01f * (float)time;
+    if (Keyboard::keys['s'])
+        cameraPos -= (calcCameraPosition() - cameraPos) * 0.01f * (float)time;
+    if (Keyboard::keys['a'])
+        cameraPos -= sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z))
+            * 0.01f * (float)time;
+    if (Keyboard::keys['d'])
+        cameraPos += sphericalToEuclidean(glm::vec3(cameraSpherePos.x + 90, 0, cameraSpherePos.z))
+            * 0.01f * (float)time;
 
-    glutPostRedisplay();
-}
+    if (Keyboard::keys[Keyboard::UP])
+        cameraSpherePos.y -= 0.07f * time;
+    if (Keyboard::keys[Keyboard::DOWN])
+        cameraSpherePos.y += 0.07f * time;
+    if (Keyboard::keys[Keyboard::LEFT])
+        cameraSpherePos.x -= 0.07f * time;
+    if (Keyboard::keys[Keyboard::RIGHT])
+        cameraSpherePos.x += 0.07f * time;
 
-void keyboardSpecial(int key, int x, int y) {
-    switch (key) {
-    case GLUT_KEY_UP:
-        cameraSpherePos.y -= 2;
-        break;
-    case GLUT_KEY_DOWN:
-        cameraSpherePos.y += 2;
-        break;
-    case GLUT_KEY_LEFT:
-        cameraSpherePos.x -= 2;
-        break;
-    case GLUT_KEY_RIGHT:
-        cameraSpherePos.x += 2;
-    };
-
+    glutTimerFunc(time, update, time);
     glutPostRedisplay();
 }
 
@@ -241,10 +230,11 @@ int main(int argc, char **argv) {
     chunk.blocks[1][0][0] = 1;
     chunk.blocks[3][3][3] = 1;
 
+    Keyboard::init();
+
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(keyboardSpecial);
+    glutTimerFunc(1000 / 60, update, 1000 / 60);
     glutMainLoop();
 
     return 0;
