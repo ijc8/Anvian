@@ -32,7 +32,7 @@ void Chunk::render() {
                                                  y * 1 + pos.y * YBlocks,
                                                  z * 1 + pos.z * ZBlocks));
                     glUniformMatrix4fv(worldMatUniform, 1, GL_FALSE, glm::value_ptr(translateMatrix));
-                    glDrawArrays(GL_QUADS, 0, 24);
+                    blocks[x][y][z]->render();
                 }
             }
         }
