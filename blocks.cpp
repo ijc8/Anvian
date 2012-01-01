@@ -7,10 +7,11 @@
 namespace Blocks {
     CubeBlock dirt("dirt", 0, 0, 0, 0, 0, 0);
     CubeBlock grass("grass", 1, 1, 1, 1, 2, 0);
-    Block *blocks[] = { &dirt, &grass };
+    CubeBlock stone("stone", 3, 3, 3, 3, 3, 3);
+    Block *blocks[] = { &dirt, &grass, &stone };
 
     void init() {
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
             blocks[i]->init();
     }
         

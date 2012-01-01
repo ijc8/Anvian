@@ -198,10 +198,11 @@ int main(int argc, char **argv) {
     if (!initGL())
         return 1;
 
-    chunk.blocks[0][0][0] = &Blocks::dirt;
+    chunk.blocks[0][0][0] = &Blocks::stone;
     chunk.blocks[0][0][1] = &Blocks::grass;
     chunk.blocks[0][1][0] = &Blocks::grass;
     chunk.blocks[0][0][3] = &Blocks::dirt;
+    chunk.blocks[0][0][5] = &Blocks::stone;
     chunk.blocks[1][0][0] = &Blocks::dirt;
     chunk.blocks[3][3][3] = &Blocks::grass;
 

@@ -30,6 +30,7 @@ public:
 namespace Blocks {
     extern CubeBlock dirt;
     extern CubeBlock grass;
+    extern CubeBlock stone;
 
     void init();
 };
